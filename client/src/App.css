@@ -1,0 +1,15 @@
+.main-content {
+    opacity: 0;
+    animation: fadeInContent 0.8s ease-out 2.8s forwards;
+}
+
+@keyframes fadeInContent {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

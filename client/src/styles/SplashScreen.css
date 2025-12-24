@@ -1,0 +1,322 @@
+/* ===== SPLASH SCREEN WITH DOOR ANIMATION ===== */
+.splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0f172a;
+    animation: fadeOutSplash 1s ease-out 3.8s forwards;
+}
+
+.splash-screen.hidden {
+    display: none;
+}
+
+.door-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    perspective: 1200px;
+}
+
+.door {
+    position: relative;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.door::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+    opacity: 0.5;
+}
+
+.door-left {
+    transform-origin: left center;
+    animation: openDoorLeft 2.2s cubic-bezier(0.77, 0, 0.175, 1) 1.8s forwards;
+    border-right: 2px solid rgba(99, 102, 241, 0.5);
+}
+
+.door-right {
+    transform-origin: right center;
+    animation: openDoorRight 2.2s cubic-bezier(0.77, 0, 0.175, 1) 1.8s forwards;
+    border-left: 2px solid rgba(99, 102, 241, 0.5);
+}
+
+.door-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.door-left .door-content {
+    align-items: flex-end;
+    padding-right: 60px;
+}
+
+.door-right .door-content {
+    align-items: flex-start;
+    padding-left: 60px;
+}
+
+.splash-title {
+    font-size: 5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 50%, #6366f1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 60px rgba(99, 102, 241, 0.6);
+    animation: titleGlow 2s ease-in-out infinite;
+    letter-spacing: 3px;
+    line-height: 1.2;
+    position: relative;
+    text-transform: uppercase;
+}
+
+.door-left .splash-title {
+    text-align: right;
+    animation: slideInLeft 0.8s ease-out;
+}
+
+.door-right .splash-title {
+    text-align: left;
+    animation: slideInRight 0.8s ease-out;
+}
+
+.splash-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    border-radius: 2px;
+    animation: lineExpand 1.5s ease-in-out infinite;
+}
+
+.door-left .splash-title::after { left: 0; }
+.door-right .splash-title::after { right: 0; }
+
+.splash-logo {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+        0 25px 80px rgba(99, 102, 241, 0.6),
+        0 0 0 25px rgba(99, 102, 241, 0.15),
+        0 0 0 50px rgba(99, 102, 241, 0.08),
+        inset 0 0 60px rgba(255, 255, 255, 0.1);
+    animation: logoFloat 3s ease-in-out infinite;
+    z-index: 10;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.splash-logo::before {
+    content: '';
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        rgba(99, 102, 241, 0.4),
+        transparent,
+        rgba(139, 92, 246, 0.4),
+        transparent
+    );
+    border-radius: 50%;
+    animation: rotate 4s linear infinite;
+}
+
+.splash-logo svg {
+    width: 70px;
+    height: 70px;
+    color: white;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+    position: relative;
+    z-index: 1;
+    animation: iconBounce 2s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes slideInLeft {
+    0% { opacity: 0; transform: translateX(-100px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+    0% { opacity: 0; transform: translateX(100px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes openDoorLeft {
+    0% { transform: perspective(1200px) rotateY(0deg); }
+    50% { transform: perspective(1200px) rotateY(-60deg); }
+    100% { transform: perspective(1200px) rotateY(-120deg); }
+}
+
+@keyframes openDoorRight {
+    0% { transform: perspective(1200px) rotateY(0deg); }
+    50% { transform: perspective(1200px) rotateY(60deg); }
+    100% { transform: perspective(1200px) rotateY(120deg); }
+}
+
+@keyframes titleGlow {
+    0%, 100% { filter: brightness(1) drop-shadow(0 0 20px rgba(99, 102, 241, 0.5)); }
+    50% { filter: brightness(1.2) drop-shadow(0 0 40px rgba(99, 102, 241, 0.8)); }
+}
+
+@keyframes lineExpand {
+    0%, 100% { transform: scaleX(0.5); opacity: 0.5; }
+    50% { transform: scaleX(1); opacity: 1; }
+}
+
+@keyframes logoFloat {
+    0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+    33% { transform: translateY(-15px) scale(1.05) rotate(5deg); }
+    66% { transform: translateY(-10px) scale(0.98) rotate(-3deg); }
+}
+
+@keyframes iconBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeOutSplash {
+    0% { opacity: 1; visibility: visible; }
+    100% { opacity: 0; visibility: hidden; }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .splash-title {
+        font-size: 3.5rem;
+        letter-spacing: 2px;
+    }
+    
+    .splash-logo {
+        width: 110px;
+        height: 110px;
+    }
+    
+    .splash-logo svg {
+        width: 55px;
+        height: 55px;
+    }
+    
+    .door-left .door-content {
+        padding-right: 40px;
+    }
+    
+    .door-right .door-content {
+        padding-left: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .splash-title {
+        font-size: 2.8rem;
+        letter-spacing: 1.5px;
+    }
+    
+    .splash-logo {
+        width: 90px;
+        height: 90px;
+        border-radius: 25px;
+    }
+    
+    .splash-logo svg {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .door-left .door-content {
+        padding-right: 30px;
+    }
+    
+    .door-right .door-content {
+        padding-left: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .splash-title {
+        font-size: 2rem;
+        letter-spacing: 1px;
+    }
+    
+    .splash-logo {
+        width: 70px;
+        height: 70px;
+        border-radius: 20px;
+    }
+    
+    .splash-logo svg {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .door-left .door-content {
+        padding-right: 20px;
+    }
+    
+    .door-right .door-content {
+        padding-left: 20px;
+    }
+}
+
+@media (max-width: 375px) {
+    .splash-title {
+        font-size: 1.6rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .splash-logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+    }
+    
+    .splash-logo svg {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .door-left .door-content {
+        padding-right: 15px;
+    }
+    
+    .door-right .door-content {
+        padding-left: 15px;
+    }
+}
