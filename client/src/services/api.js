@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// ✅ Base API URL (Render / Local)
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// ✅ Base API URL (Local + Render)
+const API_URL =
+  process.env.REACT_APP_API_URL ||
+  'http://localhost:8000';
 
 /**
  * Analyze uploaded resumes
@@ -18,7 +20,6 @@ export const analyzeResumes = async (formData) => {
       }
     );
 
-    // ✅ Normalize response to always return array
     if (Array.isArray(response.data)) {
       return response.data;
     }
@@ -27,7 +28,6 @@ export const analyzeResumes = async (formData) => {
       return response.data.results;
     }
 
-    // fallback
     return [];
   } catch (error) {
     console.error(
