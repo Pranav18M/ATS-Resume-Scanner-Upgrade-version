@@ -17,24 +17,27 @@ const upload = multer({
 
 const app = express();
 
-// CORS setup
+// CORS
 app.use(cors({
-  origin: '*', // you can restrict to your frontend URL
+  origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// JSON body parser
+// JSON parser
 app.use(express.json({ limit: '50mb' }));
 
 // ---------- ROUTES ----------
 
-// Health check / root route
+// Health check
 app.get('/', (req, res) => {
-  res.send({ status: 'OK', message: 'ATS Resume Scanner Backend is running' });
+  res.json({
+    status: 'OK',
+    message: 'ATS Resume Scanner Backend is running'
+  });
 });
 
-// Analyze resumes
+// ---------- ANALYZE ----------
 app.post('/api/analyze', upload.array('files', 500), async (req, res) => {
   try {
     const job_role = (req.body.job_role || '').trim();
@@ -42,39 +45,45 @@ app.post('/api/analyze', upload.array('files', 500), async (req, res) => {
       .split(',')
       .map(s => s.trim())
       .filter(Boolean);
+
     const min_degree = (req.body.min_degree || '').trim();
     const min_experience_years = req.body.min_experience_years
-      ? parseInt(req.body.min_experience_years)
+      ? parseInt(req.body.min_experience_years, 10)
       : null;
 
-    // Validation
     if (!job_role || required_skills.length === 0) {
-      return res.status(400).json({ error: 'job_role and required_skills are required' });
+      return res.status(400).json({
+        error: 'job_role and required_skills are required',
+        results: []
+      });
     }
 
     const files = req.files || [];
     if (files.length === 0) {
-      return res.status(400).json({ error: 'No files uploaded' });
+      return res.status(400).json({
+        error: 'No files uploaded',
+        results: []
+      });
     }
 
     console.log(`📂 Received ${files.length} resumes for analysis`);
 
-    // Extract resumes
+    // ---------- EXTRACT ----------
     const extracted = [];
+
     for (const f of files) {
       try {
         const meta = await extractResume(f.buffer, f.originalname);
-        meta.filename = f.originalname;
-        extracted.push(meta);
+        extracted.push({
+          ...meta,
+          filename: f.originalname
+        });
       } catch (e) {
         console.error(`❌ Failed to parse ${f.originalname}: ${e.message}`);
         extracted.push({
           filename: f.originalname,
           error: e.message,
           text: '',
-          images_count: 0,
-          tables_count: 0,
-          contact: {},
           sections: {},
           degree: '',
           experience_years: 0,
@@ -83,8 +92,8 @@ app.post('/api/analyze', upload.array('files', 500), async (req, res) => {
       }
     }
 
-    // Analyze
-    const results = analyzeResumeBatch(extracted, {
+    // ---------- ANALYZE (✅ CRITICAL FIX: await) ----------
+    const results = await analyzeResumeBatch(extracted, {
       job_role,
       required_skills,
       min_degree,
@@ -93,7 +102,7 @@ app.post('/api/analyze', upload.array('files', 500), async (req, res) => {
 
     console.log(`✅ Analysis complete: ${results.length} candidates processed`);
 
-    res.json({
+    return res.json({
       job_role,
       required_skills,
       min_degree,
@@ -104,22 +113,25 @@ app.post('/api/analyze', upload.array('files', 500), async (req, res) => {
 
   } catch (err) {
     console.error('🔥 Error in /api/analyze:', err);
-    res.status(500).json({ error: 'Server error', detail: err.message });
+    return res.status(500).json({
+      error: 'Server error',
+      results: []
+    });
   }
 });
 
-// Generate PDF report
+// ---------- REPORT ----------
 app.post('/api/report', async (req, res) => {
   try {
-    const payload = req.body;
-
     console.log('📝 Generating PDF report...');
-    const buf = await buildReportBuffer(payload);
+    const buf = await buildReportBuffer(req.body);
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename=ATS_Resume_Report_${new Date().toISOString().slice(0, 10)}.pdf`
+      `attachment; filename=ATS_Resume_Report_${new Date()
+        .toISOString()
+        .slice(0, 10)}.pdf`
     );
 
     res.send(buf);
@@ -127,17 +139,16 @@ app.post('/api/report', async (req, res) => {
 
   } catch (err) {
     console.error('🔥 Error in /api/report:', err);
-    res.status(500).json({ error: 'Failed to build report', detail: err.message });
+    res.status(500).json({ error: 'Failed to build report' });
   }
 });
 
-// ---------- SERVER START ----------
-
+// ---------- SERVER ----------
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`🚀 ATS Resume Scanner backend running on port ${PORT}`);
   console.log(`👉 API Endpoints:`);
-  console.log(`   GET / -> Health check`);
-  console.log(`   POST /api/analyze -> Upload resumes`);
-  console.log(`   POST /api/report -> Generate PDF report`);
+  console.log(`   GET  /`);
+  console.log(`   POST /api/analyze`);
+  console.log(`   POST /api/report`);
 });

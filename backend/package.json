@@ -8,12 +8,18 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "axios": "^1.13.2",
+    "compromise": "^14.14.5",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "get-stream": "^6.0.1",
-    "mammoth": "^1.4.19",
+    "lodash": "^4.17.21",
+    "mammoth": "^1.11.0",
     "multer": "^1.4.5-lts.1",
-    "pdf-parse": "^1.1.1",
+    "natural": "^8.1.0",
+    "openai": "^6.15.0",
+    "pdf-parse": "^1.1.4",
     "pdfkit": "^0.13.0"
   },
   "devDependencies": {

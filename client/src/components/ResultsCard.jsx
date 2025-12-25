@@ -2,13 +2,22 @@ import React from 'react';
 import '../styles/ResultsCard.css';
 
 const ResultsCard = ({ results, onDownload }) => {
+
+  // ✅ Always convert results to array safely
+  const resultsArray = Array.isArray(results)
+    ? results
+    : results?.results && Array.isArray(results.results)
+    ? results.results
+    : [];
+
   const getScoreClass = (score) => {
     if (score >= 80) return 'score-excellent';
     if (score >= 60) return 'score-good';
     return 'score-poor';
   };
 
-  if (!results || results.length === 0) return null;
+  // ✅ No results → render nothing
+  if (resultsArray.length === 0) return null;
 
   return (
     <div className="glass-card results-card">
@@ -24,6 +33,7 @@ const ResultsCard = ({ results, onDownload }) => {
             <p>Top candidates ranked by ATS compatibility</p>
           </div>
         </div>
+
         <button className="btn-success" onClick={onDownload}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -50,19 +60,23 @@ const ResultsCard = ({ results, onDownload }) => {
             </tr>
           </thead>
           <tbody>
-            {results.map((candidate, index) => (
+            {resultsArray.map((candidate, index) => (
               <tr key={index} style={{ animationDelay: `${index * 0.05}s` }}>
-                <td className="rank">#{candidate.rank}</td>
+                <td className="rank">#{candidate.rank ?? index + 1}</td>
                 <td><strong>{candidate.candidateName || 'N/A'}</strong></td>
                 <td>{candidate.email || 'N/A'}</td>
                 <td>{candidate.phone || 'N/A'}</td>
                 <td>{candidate.degree || 'N/A'}</td>
-                <td>{candidate.experience_years || '0'}</td>
-                <td className={getScoreClass(candidate.skills_match)}>{candidate.skills_match}%</td>
-                <td className={getScoreClass(candidate.education_match)}>{candidate.education_match}%</td>
-                <td className={getScoreClass(candidate.experience_score)}>{candidate.experience_score}%</td>
-                <td className={getScoreClass(candidate.ats_format_score)}>{candidate.ats_format_score}%</td>
-                <td><strong className={getScoreClass(candidate.total_score)}>{candidate.total_score}%</strong></td>
+                <td>{candidate.experience_years ?? 0}</td>
+                <td className={getScoreClass(candidate.skills_match)}>{candidate.skills_match ?? 0}%</td>
+                <td className={getScoreClass(candidate.education_match)}>{candidate.education_match ?? 0}%</td>
+                <td className={getScoreClass(candidate.experience_score)}>{candidate.experience_score ?? 0}%</td>
+                <td className={getScoreClass(candidate.ats_format_score)}>{candidate.ats_format_score ?? 0}%</td>
+                <td>
+                  <strong className={getScoreClass(candidate.total_score)}>
+                    {candidate.total_score ?? 0}%
+                  </strong>
+                </td>
               </tr>
             ))}
           </tbody>

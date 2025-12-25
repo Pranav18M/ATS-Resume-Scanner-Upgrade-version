@@ -21,7 +21,7 @@ function App() {
   const [files, setFiles] = useState([]);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState([]); // ✅ MUST be array
   const [alert, setAlert] = useState({ message: '', type: '' });
 
   useEffect(() => {
@@ -67,25 +67,29 @@ function App() {
     if (formData.minExp) {
       formDataToSend.append('min_experience_years', formData.minExp);
     }
-    files.forEach(file => {
-      formDataToSend.append('files', file);
-    });
+    files.forEach(file => formDataToSend.append('files', file));
 
     try {
-      const data = await analyzeResumes(formDataToSend);
+      const data = await analyzeResumes(formDataToSend); // ✅ ARRAY
+
       clearInterval(progressInterval);
       setProgress(100);
 
       setTimeout(() => {
-        setResults(data.results);
+        const safeResults = Array.isArray(data) ? data : [];
+        setResults(safeResults);
         setProcessing(false);
-        showAlert(`Analysis complete! ${data.results.length} candidates ranked.`, 'success');
-        
+
+        showAlert(
+          `Analysis complete! ${safeResults.length} candidates ranked.`,
+          'success'
+        );
+
         // Scroll to results
         setTimeout(() => {
-          document.querySelector('.results-card')?.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'nearest' 
+          document.querySelector('.results-card')?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest'
           });
         }, 100);
       }, 500);
@@ -93,23 +97,34 @@ function App() {
       clearInterval(progressInterval);
       setProcessing(false);
       setProgress(0);
-      showAlert('Failed to analyze. Please check if the backend server is running.', 'error');
+      showAlert(
+        'Failed to analyze. Please check if the backend server is running.',
+        'error'
+      );
       console.error('Error:', error);
     }
   };
 
   const handleDownload = async () => {
-    if (!results || results.length === 0) {
+    if (!Array.isArray(results) || results.length === 0) {
       showAlert('No results to download. Please analyze resumes first.', 'error');
       return;
     }
 
     const payload = {
       job_role: formData.jobRole,
-      required_skills: formData.requiredSkills.split(',').map(s => s.trim()).filter(Boolean),
+      required_skills: formData.requiredSkills
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean),
       min_degree: formData.minDegree,
       min_experience_years: formData.minExp || null,
-      weights: results[0]?.weights || { skills: 60, experience: 20, education: 10, ats: 10 },
+      weights: results[0]?.weights || {
+        skills: 60,
+        experience: 20,
+        education: 10,
+        ats: 10
+      },
       results: results
     };
 
@@ -133,9 +148,8 @@ function App() {
   return (
     <>
       {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
-      
+
       <div className="main-content">
-        {/* Animated Background */}
         <div className="background-animation">
           <div className="gradient-orb orb-1"></div>
           <div className="gradient-orb orb-2"></div>
@@ -145,9 +159,9 @@ function App() {
 
         <div className="container">
           <Header />
-          
+
           <JobRequirements formData={formData} setFormData={setFormData} />
-          
+
           <UploadSection
             files={files}
             setFiles={setFiles}
@@ -163,9 +177,9 @@ function App() {
           )}
 
           {processing && <ProcessingCard progress={progress} />}
-          
+
           <ResultsCard results={results} onDownload={handleDownload} />
-          
+
           <FeaturesGrid />
         </div>
       </div>
