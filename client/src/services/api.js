@@ -3,7 +3,7 @@ import axios from 'axios';
 // ✅ Base API URL (Local + Render)
 const API_URL =
   process.env.REACT_APP_API_URL ||
-  'http://localhost:8000';
+  'http://localhost:10000';
 
 /**
  * Analyze uploaded resumes
