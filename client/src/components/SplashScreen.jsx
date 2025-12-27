@@ -1,17 +1,36 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import authUtils from '../utils/auth';
 import '../styles/SplashScreen.css';
 
 const SplashScreen = ({ onComplete }) => {
   const [isHidden, setIsHidden] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsHidden(true);
-      if (onComplete) onComplete();
-    }, 4000);
+      
+      // Check authentication after splash screen
+      setTimeout(() => {
+        const isAuthenticated = authUtils.isAuthenticated();
+        const token = authUtils.getToken();
+        
+        if (isAuthenticated && token && !authUtils.isTokenExpired(token)) {
+          // User is logged in, go to dashboard
+          navigate('/dashboard', { replace: true });
+        } else {
+          // User is not logged in, go to login
+          authUtils.clearAuth();
+          navigate('/login', { replace: true });
+        }
+        
+        if (onComplete) onComplete();
+      }, 500);
+    }, 3000); // 3 seconds splash screen
 
     return () => clearTimeout(timer);
-  }, [onComplete]);
+  }, [navigate, onComplete]);
 
   return (
     <div className={`splash-screen ${isHidden ? 'hidden' : ''}`}>

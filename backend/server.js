@@ -2,10 +2,16 @@
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
+require('dotenv').config();
+
+const connectDB = require('./db');
 
 const { extractResume } = require('./parser_utils');
 const { analyzeResumeBatch } = require('./scoring');
 const { buildReportBuffer } = require('./report');
+
+// ✨ ADD THIS LINE - Import auth routes
+const authRoutes = require('./routes/auth');
 
 // ---------- CONFIG ----------
 
@@ -16,6 +22,10 @@ const upload = multer({
 });
 
 const app = express();
+
+// 🔥 CONNECT MONGODB
+connectDB();
+
 
 // CORS
 app.use(cors({
@@ -28,6 +38,9 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 
 // ---------- ROUTES ----------
+
+// ✨ ADD THIS LINE - Register auth routes
+app.use('/api/auth', authRoutes);
 
 // Health check
 app.get('/', (req, res) => {
@@ -149,6 +162,11 @@ app.listen(PORT, () => {
   console.log(`🚀 ATS Resume Scanner backend running on port ${PORT}`);
   console.log(`👉 API Endpoints:`);
   console.log(`   GET  /`);
+  console.log(`   POST /api/auth/signup`);    // ✨ NEW
+  console.log(`   POST /api/auth/login`);     // ✨ NEW
+  console.log(`   POST /api/auth/verify`);    // ✨ NEW
+  console.log(`   POST /api/auth/logout`);    // ✨ NEW
+  console.log(`   GET  /api/auth/me`);        // ✨ NEW
   console.log(`   POST /api/analyze`);
   console.log(`   POST /api/report`);
 });
